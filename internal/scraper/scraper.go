@@ -17,18 +17,7 @@ import (
 //Only for image scrapping. For info scraping about
 //a Webnovel use ScrapAsuraDetails()
 func ScrapAsuraImages(url string, path string){
-	collector := colly.NewCollector(
-		//Turn on async mode
-		colly.Async(),
-		colly.IgnoreRobotsTxt(),
-	)
-
-	// Limit the number of threads started by colly to two
-	// when visiting links which domains' matches "*httpbin.*" glob
-	collector.Limit(&colly.LimitRule{
-		Parallelism: 2,
-		Delay: 5 * time.Second,
-	})
+	collector := newCollector()
 
 	//Used for naming downloaded images (from 0 upwards)
 	counter := 0
@@ -53,18 +42,7 @@ func ScrapAsuraDetails(url string, path string) types.Novel{
 		Genre: make([]string, 0),
 	}
 
-	collector := colly.NewCollector(
-		//Turn on async mode
-		colly.Async(),
-		colly.IgnoreRobotsTxt(),
-	)
-
-	//Limit the number of threads started by colly to two
-	//when visiting links which domains' matches "*httpbin.*" glob
-	collector.Limit(&colly.LimitRule{
-		Parallelism: 2,
-		Delay: 5 * time.Second,
-	})
+	collector := newCollector()
 
 	//Get cover image
 	collector.OnHTML("img.wp-post-image", func(e *colly.HTMLElement) {
@@ -145,4 +123,21 @@ func getImages(url string, fullPath string) {
 	if err != nil {
 		log.Printf("[ERROR]: Couldn't write to file. %s", err)
 	}
+}
+
+func newCollector() colly.Collector {
+	collector := colly.NewCollector(
+		//Turn on async mode
+		colly.Async(),
+		colly.IgnoreRobotsTxt(),
+	)
+
+	// Limit the number of threads started by colly to two
+	// when visiting links which domains' matches "*httpbin.*" glob
+	collector.Limit(&colly.LimitRule{
+		Parallelism: 2,
+		Delay: 5 * time.Second,
+	})
+
+	return *collector
 }
